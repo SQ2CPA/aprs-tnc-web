@@ -1,0 +1,51 @@
+version: "3.8"
+
+services:
+    app:
+        image: .
+        # image: ghcr.io/SQ2CPA/aprs-tnc-web:latest
+        container_name: nextjs_app
+        restart: unless-stopped
+        networks:
+            - app-network
+        env_file: .env
+        ports:
+            - "${PORT:-8000}:8000"
+
+        environment:
+            NODE_ENV: production
+            PORT: 8000
+
+            DB_HOST: ${DB_HOST}
+            DB_USER: ${DB_USER}
+            DB_PASSWORD: ${DB_PASSWORD}
+            DB_NAME: ${DB_NAME}
+            DB_PORT: ${DB_PORT}
+        depends_on:
+            - mysql_db
+
+    mysql_db:
+        image: mysql:8.0
+        container_name: mysql_database
+        restart: unless-stopped
+        networks:
+            - app-network
+
+        env_file: .env
+        environment:
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+        volumes:
+            - mysql-data:/var/lib/mysql
+
+        command: --default-authentication-plugin=mysql_native_password
+
+networks:
+    app-network:
+        driver: bridge
+
+volumes:
+    mysql-data:
