@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
     app:
-        image: ghcr.io/sq2cpa/aprs-tnc-web:v1.0.1
+        image: ghcr.io/sq2cpa/aprs-tnc-web:v1.0.2
         container_name: nextjs_app
         restart: unless-stopped
         networks:
@@ -10,6 +10,10 @@ services:
         env_file: .env
         ports:
             - "${PORT:-8000}:8000"
+
+        user: "${UID}:${GID}"
+        volumes:
+            - ./frames.txt:/app/frames.txt
 
         environment:
             NODE_ENV: production
