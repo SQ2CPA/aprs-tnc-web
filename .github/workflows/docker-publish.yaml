@@ -47,7 +47,7 @@ jobs:
               run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
             - name: "Build and tag Docker image"
-              run: docker build -t ghcr.io/${{ github.repository }}:${{ github.event.inputs.version }} .
+              run: docker build -t ghcr.io/sq2cpa/aprs-tnc-web:${{ github.event.inputs.version }} .
 
             - name: "Publish Docker image"
-              run: docker push ghcr.io/${{ github.repository }}:${{ github.event.inputs.version }}
+              run: docker push ghcr.io/sq2cpa/aprs-tnc-web:${{ github.event.inputs.version }}
