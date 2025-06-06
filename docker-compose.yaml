@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
     app:
-        image: ghcr.io/sq2cpa/aprs-tnc-web:v1.0.0
+        image: ghcr.io/sq2cpa/aprs-tnc-web:v1.0.1
         container_name: nextjs_app
         restart: unless-stopped
         networks:
