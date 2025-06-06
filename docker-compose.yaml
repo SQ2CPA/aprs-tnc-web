@@ -2,8 +2,7 @@ version: "3.8"
 
 services:
     app:
-        image: .
-        # image: ghcr.io/SQ2CPA/aprs-tnc-web:latest
+        image: ghcr.io/sq2cpa/aprs-tnc-web:v1.0.0
         container_name: nextjs_app
         restart: unless-stopped
         networks:
@@ -16,11 +15,10 @@ services:
             NODE_ENV: production
             PORT: 8000
 
-            DB_HOST: ${DB_HOST}
-            DB_USER: ${DB_USER}
-            DB_PASSWORD: ${DB_PASSWORD}
-            DB_NAME: ${DB_NAME}
-            DB_PORT: ${DB_PORT}
+            MYSQL_HOST: ${DB_HOST}
+            MYSQL_USER: ${DB_USER}
+            MYSQL_PASS: ${DB_PASSWORD}
+            MYSQL_DB: ${DB_NAME}
         depends_on:
             - mysql_db
 
