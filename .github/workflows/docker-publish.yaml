@@ -1,21 +1,53 @@
-name: Docker Publish
+name: Release and Publish
 
 on:
-    push:
-        tags:
-            - "v*"
+    workflow_dispatch:
+        inputs:
+            version:
+                required: true
+                type: string
+                description: "Versuin"
 
 jobs:
-    publish:
+    create_tag:
+        name: "Create Git Tag"
         runs-on: ubuntu-latest
+        permissions:
+            contents: write
+        steps:
+            - name: "Checkout code"
+              uses: actions/checkout@v4
+              with:
+                  token: ${{ secrets.GITHUB_TOKEN | secrets.GITHUB_TOKEN }}
+
+            - name: "Configure Git user"
+              run: |
+                  git config user.name "GitHub Actions"
+                  git config user.email "actions@github.com"
+
+            - name: "Create and push tag"
+              run: |
+                  git tag -a ${{ github.event.inputs.version }} -m "Release ${{ github.event.inputs.version }}"
+                  git push origin ${{ github.event.inputs.version }}
+
+    publish:
+        name: "Build and Publish Docker Image"
+        runs-on: ubuntu-latest
+        needs: create_tag
         permissions:
             contents: read
             packages: write
         steps:
-            - uses: actions/checkout@v2
-            - name: Log into registry
+            - name: "Checkout code"
+              uses: actions/checkout@v4
+              with:
+                  ref: ${{ github.event.inputs.version }}
+
+            - name: "Log into GitHub Container Registry"
               run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            - name: Build
-              run: docker build -t ghcr.io/SQ2CPA/aprs-tnc-web:${{github.ref_name}} .
-            - name: Publish
-              run: docker push ghcr.io/SQ2CPA/aprs-tnc-web:${{github.ref_name}}
+
+            - name: "Build and tag Docker image"
+              run: docker build -t ghcr.io/${{ github.repository }}:${{ github.event.inputs.version }} .
+
+            - name: "Publish Docker image"
+              run: docker push ghcr.io/${{ github.repository }}:${{ github.event.inputs.version }}
