@@ -33,11 +33,13 @@ async function processAndSavePacket(
     parsedAPRSPacket: APRSFrame,
     rawDecodedFrame: string
 ): Promise<void> {
-    await appendFile(
-        "./frames.txt",
-        `${new Date().toUTCString()} : ${rawDecodedFrame}\r\n`,
-        "utf-8"
-    );
+    try {
+        await appendFile(
+            "./frames.txt",
+            `${new Date().toUTCString()} : ${rawDecodedFrame}\r\n`,
+            "utf-8"
+        );
+    } catch {}
 
     const transaction = await sequelize.transaction();
 
