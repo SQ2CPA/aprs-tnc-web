@@ -35,7 +35,7 @@ async function processAndSavePacket(
 ): Promise<void> {
     try {
         await appendFile(
-            "./frames.txt",
+            "./data/frames.txt",
             `${new Date().toUTCString()} : ${rawDecodedFrame}\r\n`,
             "utf-8"
         );
@@ -95,7 +95,8 @@ async function processAndSavePacket(
                 }
             } else if (
                 parsedAPRSPacket.content.toLowerCase() !== "ping" &&
-                parsedAPRSPacket.sender !== currentMyCallsign
+                parsedAPRSPacket.sender !== currentMyCallsign &&
+                parsedAPRSPacket.recipient === currentMyCallsign
             ) {
                 const messageId = parsedAPRSPacket.ack;
 

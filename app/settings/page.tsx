@@ -58,8 +58,8 @@ export default function SettingsPage() {
                     retryInterval: data.retryInterval?.toString() || "30",
                     myCallsign: data.myCallsign || "",
                     ssid: data.ssid?.toString() || "0",
-                    latitude: data.latitude?.toString() || "0",
-                    longitude: data.longitude?.toString() || "0",
+                    latitude: data.latitude?.toString() || "52.2420",
+                    longitude: data.longitude?.toString() || "20.9938",
                 };
 
                 setTncAddress(initialSettings.tncAddress);

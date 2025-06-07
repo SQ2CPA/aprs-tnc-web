@@ -53,10 +53,39 @@ const getSpritePosition = (symbolChar: string | null) => {
 
 export default function MapComponent({ stations = [] }: MapComponentProps) {
     const router = useRouter();
-    const [mapCenter, setMapCenter] = useState<[number, number]>([
-        53.3446254010451, 17.64361406227762,
-    ]);
+    const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
     const mapRef = useRef(null);
+
+    useEffect(() => {
+        const fetchSettingsAndSetCenter = async () => {
+            try {
+                const response = await fetch("/api/settings");
+                if (!response.ok) {
+                    throw new Error("Settings fetch failed");
+                }
+                const data = await response.json();
+
+                if (data.latitude && data.longitude) {
+                    const lat = parseFloat(data.latitude);
+                    const lng = parseFloat(data.longitude);
+
+                    if (!isNaN(lat) && !isNaN(lng)) {
+                        setMapCenter([lat, lng]);
+                    } else {
+                        setMapCenter([52.2297, 21.0122]);
+                    }
+                }
+            } catch (error) {
+                setMapCenter([52.2297, 21.0122]);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchSettingsAndSetCenter();
+    }, []);
 
     const createStationIcon = (
         callsign: string,
@@ -122,9 +151,17 @@ export default function MapComponent({ stations = [] }: MapComponentProps) {
         router.push(`/messages/${callsign}`);
     };
 
+    if (isLoading) {
+        return (
+            <div className="container max-w-2xl py-10 flex justify-center items-center text-white">
+                <p>Loading map...</p>
+            </div>
+        );
+    }
+
     return (
         <MapContainer
-            center={mapCenter}
+            center={mapCenter || [52.2297, 21.0122]}
             zoom={10}
             style={{ height: "100%", width: "100%", zIndex: 1 }}
             attributionControl={true}
