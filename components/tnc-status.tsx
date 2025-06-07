@@ -41,8 +41,7 @@ export default function TncStatus() {
         return (
             <button
                 onClick={toggleView}
-                className="p-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur shadow-md rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                aria-label="Rozwiń status TNC"
+                className="p-2 bg-white/90 dark:bg-gray-800/90 dark:text-slate-200 backdrop-blur shadow-md rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
             >
                 <RadioTower className="h-6 w-6" />
             </button>
@@ -50,13 +49,14 @@ export default function TncStatus() {
     }
 
     return (
-        <Card className="w-48 bg-white/90 dark:bg-gray-800/90 backdrop-blur shadow-md">
+        <Card className="w-48 bg-white/90 dark:bg-gray-800/90 dark:text-slate-200 dark:border-gray-700 backdrop-blur shadow-md">
             <div className="flex items-center justify-between p-2">
-                <h3 className="font-semibold text-sm">TNC Status</h3>
+                <h3 className="font-semibold text-sm dark:text-white">
+                    TNC Status
+                </h3>
                 <button
                     onClick={toggleView}
                     className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
-                    aria-label="Zwiń status TNC"
                 >
                     <X size={16} />
                 </button>

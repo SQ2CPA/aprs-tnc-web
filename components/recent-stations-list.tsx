@@ -51,10 +51,12 @@ export default function RecentStationsList() {
     };
 
     return (
-        <Card className="w-64 bg-white/90 dark:bg-gray-800/90 backdrop-blur shadow-md">
+        <Card className="w-64 bg-white/90 dark:bg-gray-800/90 dark:text-slate-200 dark:border-gray-700 backdrop-blur shadow-md">
             <CardContent className="p-2">
                 <div className="flex justify-between items-center mb-1">
-                    <h3 className="font-semibold text-sm">Recent Stations</h3>
+                    <h3 className="font-semibold text-sm dark:text-white">
+                        Recent Stations
+                    </h3>
                     <div className="flex gap-1">
                         <Link href="/stations">
                             <Button
@@ -68,7 +70,7 @@ export default function RecentStationsList() {
                         </Link>
                         <button
                             onClick={toggleExpanded}
-                            className="text-xs text-blue-500 hover:text-blue-700 px-1"
+                            className="text-xs text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 px-1"
                         >
                             {expanded ? "Hide" : "Show"}
                         </button>
@@ -98,7 +100,7 @@ export default function RecentStationsList() {
                                         <span className="text-xs font-medium flex-grow">
                                             {station.callsign}
                                         </span>
-                                        <span className="text-xs text-gray-500">
+                                        <span className="text-xs text-gray-500 dark:text-gray-400">
                                             {formatTimeAgo(
                                                 station.lastPacketAt
                                             )}

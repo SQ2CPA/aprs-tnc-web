@@ -78,7 +78,7 @@ export default function Home() {
                         placeholder="Enter callsign..."
                         value={callsign}
                         onChange={(e) => setCallsign(e.target.value)}
-                        className="bg-white/90 dark:bg-gray-800/90 backdrop-blur"
+                        className="bg-white/90 dark:bg-gray-800/90 backdrop-blur dark:text-slate-100 dark:placeholder:text-gray-400"
                     />
                     <Button type="submit">
                         <Search className="h-4 w-4 md:mr-2" />
@@ -91,13 +91,13 @@ export default function Home() {
                         <Link href="/conversations">
                             <Button
                                 variant="outline"
-                                className="bg-white/90 dark:bg-gray-800/90 backdrop-blur"
+                                className="bg-white/90 dark:bg-gray-800/90 dark:text-white dark:border-gray-600 backdrop-blur"
                             >
                                 Conversations
                             </Button>
                         </Link>
 
-                        <div className="flex items-center gap-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur rounded-md px-3 py-2">
+                        <div className="flex items-center gap-2 bg-white/90 dark:bg-gray-800/90 dark:text-white backdrop-blur rounded-md px-3 py-2">
                             <Clock className="h-4 w-4 text-muted-foreground" />
                             <Select
                                 value={selectedHours}
@@ -122,7 +122,7 @@ export default function Home() {
                         <Button
                             variant="outline"
                             size="icon"
-                            className="bg-white/90 dark:bg-gray-800/90 backdrop-blur"
+                            className="bg-white/90 dark:bg-gray-800/90 backdrop-blur dark:text-white dark:border-gray-600"
                         >
                             <Settings className="h-4 w-4" />
                             <span className="sr-only">Settings</span>
