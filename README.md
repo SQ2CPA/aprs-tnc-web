@@ -2,11 +2,15 @@
 
 A simple, web-based APRS interface for your KISS mode TNC. Decode frames, view raw data, send and receive messages, all from a web browser.
 
+![chrome_zeKthzGAm3](https://github.com/user-attachments/assets/dc0ef9c5-6c61-4893-9da8-69b1d390aeda)
+
 ## Overview
 
 APRS TNC Web offers a straightforward way to interact with the APRS network. By connecting your TNC in KISS mode, you get access to a clean web interface to monitor local APRS traffic and manage your messages. The entire application runs within a Docker container, making it incredibly easy to deploy on any system in your network-be it a Raspberry Pi, a home server, or your desktop computer.
 
 This project is specifically designed for amateur radio operators looking for a simple, cross-platform alternative to more complex or Windows-only software like APRSIS32. If your primary needs are monitoring local activity and handling APRS messages, APRS TNC Web is for you! :)
+
+![chrome_mj3AbZRk8i](https://github.com/user-attachments/assets/d7891911-d386-4703-bf9a-f19899f28738)
 
 ## Features
 
@@ -79,3 +83,13 @@ The current version of APRS TNC Web focuses on the core functionalities of monit
 Contributions and feature suggestions are welcome!
 
 # 73, Damian SQ2CPA, Poland
+
+## More photos
+
+![chrome_TF5KFSzTqi](https://github.com/user-attachments/assets/48a03eee-466f-4cfe-93d9-0e2ef6b6d137)
+![chrome_Wsy8Iw6629](https://github.com/user-attachments/assets/ed70c992-947b-499c-a176-8176fac8543b)
+![chrome_jBn9GE52Bo](https://github.com/user-attachments/assets/2b0d733a-0603-4dfc-9b77-6dac49ec9c17)
+![chrome_HRfkZLLFTP](https://github.com/user-attachments/assets/ecf8e668-6ade-4f20-baeb-44cbf2280ce0)
+![chrome_FkLh7KnkmK](https://github.com/user-attachments/assets/ba30ea04-81a4-481b-a8c6-6d177919849a)
+![chrome_dvkzRCPzzb](https://github.com/user-attachments/assets/7d7ce8e7-5715-4f13-9a1d-c61f510ae860)
+![chrome_b0UGKKvwAS](https://github.com/user-attachments/assets/d60930cd-3953-447a-9ce5-23f8a9f237d8)
