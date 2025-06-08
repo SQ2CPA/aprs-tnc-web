@@ -2,7 +2,7 @@
 
 A simple, web-based APRS interface for your KISS mode TNC. Decode frames, view raw data, send and receive messages, all from a web browser.
 
-![chrome_zeKthzGAm3](https://github.com/user-attachments/assets/dc0ef9c5-6c61-4893-9da8-69b1d390aeda)
+![photo_2025-06-08_19-05-56](https://github.com/user-attachments/assets/621928f4-4b38-481d-b429-3af6274b6f7d)
 
 ## Overview
 
@@ -86,6 +86,9 @@ Contributions and feature suggestions are welcome!
 
 ## More photos
 
+![photo_2025-06-08_19-07-00](https://github.com/user-attachments/assets/d6b05ec8-f327-4939-99c4-56cf0c2a9e38)
+![photo_2025-06-08_17-27-07](https://github.com/user-attachments/assets/befa045e-f82d-4075-8844-6dfd49baa553)
+![photo_2025-06-08_17-21-43](https://github.com/user-attachments/assets/07adb6dd-727b-465c-81c4-b4202d37fef2)
 ![chrome_TF5KFSzTqi](https://github.com/user-attachments/assets/48a03eee-466f-4cfe-93d9-0e2ef6b6d137)
 ![chrome_Wsy8Iw6629](https://github.com/user-attachments/assets/ed70c992-947b-499c-a176-8176fac8543b)
 ![chrome_jBn9GE52Bo](https://github.com/user-attachments/assets/2b0d733a-0603-4dfc-9b77-6dac49ec9c17)
