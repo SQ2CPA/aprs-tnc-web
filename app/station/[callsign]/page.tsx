@@ -21,6 +21,8 @@ import {
     Sun,
     Snowflake,
     Zap,
+    Map,
+    LineChart,
 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -229,6 +231,15 @@ export default function StationPage() {
                             </div>
                         </div>
                         <div className="flex flex-col gap-2 sm:flex-row">
+                            <Link href={`/station/${callsign}/map`}>
+                                <Button
+                                    variant="outline"
+                                    className="w-full justify-start sm:w-auto"
+                                >
+                                    <Map className="mr-2 h-4 w-4" />
+                                    Map
+                                </Button>
+                            </Link>
                             <Link href={`/station/${callsign}/frames`}>
                                 <Button
                                     variant="outline"
@@ -256,7 +267,7 @@ export default function StationPage() {
                             </div>
                             <div className="flex justify-between">
                                 <span className="font-medium">
-                                    Last Packet:
+                                    Last Position:
                                 </span>
                                 <span>
                                     {stationDetails.lastPacketAt.toLocaleString()}
@@ -274,9 +285,19 @@ export default function StationPage() {
                             parsedData.isWX &&
                             parsedData.wxData && (
                                 <div className="pt-4 border-t">
-                                    <h3 className="font-medium mb-3">
-                                        Weather Report
-                                    </h3>
+                                    <div className="flex justify-between items-center mb-3">
+                                        <h3 className="font-medium">
+                                            Weather Report
+                                        </h3>
+                                        <Link
+                                            href={`/station/${callsign}/weather`}
+                                        >
+                                            <Button variant="outline" size="sm">
+                                                <LineChart className="mr-2 h-4 w-4" />
+                                                History
+                                            </Button>
+                                        </Link>
+                                    </div>
                                     <div className="grid gap-x-4 gap-y-3 md:grid-cols-2">
                                         {Object.entries(parsedData.wxData).map(
                                             ([key, value]) => {
@@ -319,9 +340,19 @@ export default function StationPage() {
                             parsedData.isTelemetry &&
                             parsedData.decodedTelemetry && (
                                 <div className="pt-4 border-t">
-                                    <h3 className="font-medium mb-3">
-                                        Telemetry
-                                    </h3>
+                                    <div className="flex justify-between items-center mb-3">
+                                        <h3 className="font-medium">
+                                            Telemetry
+                                        </h3>
+                                        <Link
+                                            href={`/station/${callsign}/telemetry`}
+                                        >
+                                            <Button variant="outline" size="sm">
+                                                <LineChart className="mr-2 h-4 w-4" />
+                                                History
+                                            </Button>
+                                        </Link>
+                                    </div>
                                     <div className="grid gap-x-4 gap-y-2 md:grid-cols-2">
                                         {Object.entries(
                                             parsedData.decodedTelemetry

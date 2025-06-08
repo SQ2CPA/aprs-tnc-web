@@ -107,6 +107,8 @@ export default class APRSWeatherParser {
         let commentCurentPosition = 0;
         const weather: APRSWXData = {};
 
+        comment = comment.replace("h100", "h99");
+
         while (true) {
             const parsedWeatherSymbol =
                 weatherParsingMap[comment[commentCurentPosition]];

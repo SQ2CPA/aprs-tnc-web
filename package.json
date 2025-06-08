@@ -11,6 +11,7 @@
         "script:sync": "tsx scripts/sync.ts"
     },
     "dependencies": {
+        "@radix-ui/react-alert-dialog": "^1.1.14",
         "@radix-ui/react-label": "^2.1.6",
         "@radix-ui/react-select": "^2.2.4",
         "@radix-ui/react-slot": "^1.2.2",
@@ -29,6 +30,7 @@
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
         "react-leaflet": "^5.0.0",
+        "recharts": "^2.15.3",
         "schema-dts": "^1.1.5",
         "sequelize": "^6.37.7",
         "slugify": "^1.6.6",
