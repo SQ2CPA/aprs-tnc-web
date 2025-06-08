@@ -7,6 +7,7 @@ import {
     Marker,
     Popup,
     ZoomControl,
+    Polyline,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { useRouter } from "next/navigation";
@@ -14,6 +15,7 @@ import L from "leaflet";
 import ReactDOMServer from "react-dom/server";
 import { AprsMapIcon } from "./AprsMapIcon";
 import { AprsIcon } from "./AprsIcon";
+import { Loader2 } from "lucide-react";
 
 interface Station {
     callsign: string;
@@ -25,30 +27,34 @@ interface Station {
     path: string;
     lastPosition?: string;
     lastPacketAt: Date;
+    pathCoordinates: [number, number][];
 }
 
 interface MapComponentProps {
     stations: Station[];
 }
 
-const ICON_SIZE = 48;
-const SPRITE_COLS = 16;
+const getColorFromCallsign = (callsign: string): string => {
+    const colors: string[] = [
+        "#FF5733",
+        "#3357FF",
+        "#33FF57",
+        "#FFC300",
+        "#C70039",
+    ];
 
-const SPRITE_URLS = {
-    primary: "/symbols/aprs-symbols-48-0.png",
-    secondary: "/symbols/aprs-symbols-48-1.png",
-    overlay: "/symbols/aprs-symbols-48-2.png",
-};
+    if (!callsign || callsign.length === 0) {
+        return colors[0];
+    }
 
-const getSpritePosition = (symbolChar: string | null) => {
-    if (!symbolChar) return null;
-    const charCode = symbolChar.charCodeAt(0);
-    if (charCode < 33 || charCode > 126) return null;
+    let hash = 0;
+    for (let i = 0; i < callsign.length; i++) {
+        hash += callsign.charCodeAt(i);
+    }
 
-    const index = charCode - 33;
-    const x = (index % SPRITE_COLS) * ICON_SIZE;
-    const y = Math.floor(index / SPRITE_COLS) * ICON_SIZE;
-    return { x, y };
+    const index = hash % colors.length;
+
+    return colors[index];
 };
 
 export default function MapComponent({ stations = [] }: MapComponentProps) {
@@ -94,7 +100,7 @@ export default function MapComponent({ stations = [] }: MapComponentProps) {
         const iconHtml = ReactDOMServer.renderToString(
             <>
                 <div className="aprs-marker">
-                    <AprsMapIcon symbol={aprsSymbol} size={48} />
+                    <AprsMapIcon symbol={aprsSymbol} size={32} />
                     <div className="aprs-callsign">{callsign}</div>
                 </div>
             </>
@@ -147,14 +153,18 @@ export default function MapComponent({ stations = [] }: MapComponentProps) {
         router.push(`/station/${callsign}`);
     };
 
+    const handleMapClick = (callsign: string) => {
+        router.push(`/station/${callsign}/map`);
+    };
+
     const handleMessageClick = (callsign: string) => {
         router.push(`/messages/${callsign}`);
     };
 
     if (isLoading) {
         return (
-            <div className="container max-w-2xl py-10 flex justify-center items-center text-white">
-                <p>Loading map...</p>
+            <div className="h-screen w-full flex items-center justify-center text-white">
+                <Loader2 className="h-8 w-8 animate-spin text-white" />
             </div>
         );
     }
@@ -173,6 +183,16 @@ export default function MapComponent({ stations = [] }: MapComponentProps) {
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
+
+            {stations.map((station) => (
+                <Polyline
+                    pathOptions={{
+                        color: getColorFromCallsign(station.callsign),
+                        weight: 3,
+                    }}
+                    positions={station.pathCoordinates}
+                />
+            ))}
 
             {stations.map((station) => (
                 <Marker
@@ -218,6 +238,14 @@ export default function MapComponent({ stations = [] }: MapComponentProps) {
                                     className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs font-medium transition-colors"
                                 >
                                     Info
+                                </button>
+                                <button
+                                    onClick={() =>
+                                        handleMapClick(station.callsign)
+                                    }
+                                    className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded text-xs font-medium transition-colors"
+                                >
+                                    Map
                                 </button>
                                 <button
                                     onClick={() =>

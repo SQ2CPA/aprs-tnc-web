@@ -18,6 +18,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import ConversationsButton from "@/components/conversation-button";
 
 const MapComponent = dynamic(() => import("@/components/map-component"), {
     ssr: false,
@@ -88,14 +89,7 @@ export default function Home() {
 
                 <div className="w-full flex justify-between items-center order-2">
                     <div className="flex items-center gap-2">
-                        <Link href="/conversations">
-                            <Button
-                                variant="outline"
-                                className="bg-white/90 dark:bg-gray-800/90 dark:text-white dark:border-gray-600 backdrop-blur"
-                            >
-                                Conversations
-                            </Button>
-                        </Link>
+                        <ConversationsButton />
 
                         <div className="flex items-center gap-2 bg-white/90 dark:bg-gray-800/90 dark:text-white backdrop-blur rounded-md px-3 py-2">
                             <Clock className="h-4 w-4 text-muted-foreground" />

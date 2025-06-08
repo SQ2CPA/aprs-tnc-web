@@ -1,3 +1,4 @@
+import { APRSBeaconFrame } from "@/lib/aprs/types";
 import { Packet, Station } from "@/lib/db/models";
 import { NextResponse } from "next/server";
 import { Op } from "sequelize";
@@ -8,10 +9,8 @@ export async function GET(
 ) {
     const { callsign } = await params;
 
-    const station = await Station.findOne({
-        where: {
-            callsign,
-        },
+    const stationWithLastPacket = await Station.findOne({
+        where: { callsign },
         include: [
             {
                 model: Packet,
@@ -19,22 +18,47 @@ export async function GET(
                 order: [["receivedAt", "DESC"]],
                 where: {
                     parsedType: "beacon",
+                    "parsedData.location.latitude": { [Op.ne]: null },
                 },
                 limit: 1,
-                attributes: ["path", "parsedData"],
+                required: false,
             },
         ],
     });
 
-    if (!station) return NextResponse.json({}, { status: 404 });
+    if (!stationWithLastPacket) {
+        return NextResponse.json({}, { status: 404 });
+    }
+
+    const lastPacket = stationWithLastPacket.packets?.[0] ?? null;
+
+    const twentyFourHoursAgo = new Date();
+    twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
+
+    const pathPackets = await Packet.findAll({
+        where: {
+            callsign: stationWithLastPacket.callsign,
+            parsedType: "beacon",
+            receivedAt: { [Op.gte]: twentyFourHoursAgo },
+            "parsedData.location.latitude": { [Op.ne]: null },
+        },
+        order: [["receivedAt", "ASC"]],
+        attributes: ["parsedData", "receivedAt", "path"],
+    });
+
+    const pathCoordinates = pathPackets.map((p) => [
+        (p.parsedData as APRSBeaconFrame).location.latitude,
+        (p.parsedData as APRSBeaconFrame).location.longitude,
+    ]);
+
+    const pathPacketsInfo = pathPackets.map((p) => ({
+        lat: (p.parsedData as APRSBeaconFrame).location.latitude,
+        lng: (p.parsedData as APRSBeaconFrame).location.longitude,
+        time: p.receivedAt,
+        path: p.path,
+    }));
 
     const callsignOnly = callsign.split("-")[0];
-
-    const lastPacketPath =
-        station.packets && station.packets.length > 0
-            ? station.packets[0].path
-            : null;
-
     const others = await Station.findAll({
         where: {
             [Op.or]: [
@@ -46,21 +70,21 @@ export async function GET(
     });
 
     const stationDetails = {
-        callsign,
-        symbol: station.lastSymbol,
-        comment: station.comment,
-        lastPacketAt: station.lastPacketAt,
-        path: lastPacketPath,
+        callsign: stationWithLastPacket.callsign,
+        symbol: stationWithLastPacket.lastSymbol,
+        comment: stationWithLastPacket.comment,
+        lastPacketAt: stationWithLastPacket.lastPacketAt,
+        path: lastPacket ? lastPacket.path : null,
+        parsedData: lastPacket ? lastPacket.parsedData : null,
+        pathCoordinates,
+        pathPacketsInfo,
+        pathPacketsCount: pathPackets.length,
         ssids: others
-            .filter((station) => station.callsign !== callsign)
-            .map((station) => ({
-                callsign: station.callsign,
-                symbol: station.lastSymbol,
+            .filter((s) => s.callsign !== callsign)
+            .map((s) => ({
+                callsign: s.callsign,
+                symbol: s.lastSymbol,
             })),
-        parsedData:
-            station.packets && station.packets.length > 0
-                ? station.packets[0].parsedData
-                : null,
     };
 
     return NextResponse.json(stationDetails);
