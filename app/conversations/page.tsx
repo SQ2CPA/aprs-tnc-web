@@ -16,7 +16,18 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft, MessageSquare, Plus } from "lucide-react";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { ArrowLeft, Delete, MessageSquare, Plus } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -38,9 +49,9 @@ export default function ConversationsPage() {
             const response = await fetch("/api/conversations");
             const data = await response.json();
             setConversations(data);
-            setLoading(false);
         } catch (error) {
             console.error("Error fetching conversations:", error);
+        } finally {
             setLoading(false);
         }
     };
@@ -50,6 +61,26 @@ export default function ConversationsPage() {
         const intervalId = setInterval(fetchConversations, 5000);
         return () => clearInterval(intervalId);
     }, []);
+
+    const handleDelete = async (callsign: string) => {
+        try {
+            const response = await fetch(`/api/conversations/delete`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ callsign }),
+            });
+
+            if (response.ok) {
+                fetchConversations();
+            } else {
+                console.error("Failed to delete conversation");
+            }
+        } catch (error) {
+            console.error("Error deleting conversation:", error);
+        }
+    };
 
     return (
         <FooterLayout>
@@ -64,6 +95,7 @@ export default function ConversationsPage() {
 
             <Card>
                 <CardHeader>
+                    {/* ... bez zmian ... */}
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <CardTitle>Conversations</CardTitle>
@@ -101,11 +133,8 @@ export default function ConversationsPage() {
                                         <TableCell className="font-medium">
                                             {conversation.callsign}
                                         </TableCell>
-                                        <TableCell className="truncate max-w-[200px]">
+                                        <TableCell className="truncate max-w-[150px]">
                                             <div className="flex items-center gap-2">
-                                                <span>
-                                                    {conversation.lastMessage}
-                                                </span>
                                                 {conversation.unread > 0 && (
                                                     <Badge
                                                         variant="destructive"
@@ -114,6 +143,9 @@ export default function ConversationsPage() {
                                                         {conversation.unread}
                                                     </Badge>
                                                 )}
+                                                <span>
+                                                    {conversation.lastMessage}
+                                                </span>
                                             </div>
                                         </TableCell>
                                         <TableCell>
@@ -129,7 +161,53 @@ export default function ConversationsPage() {
                                                     <MessageSquare className="mr-2 h-4 w-4" />
                                                     View
                                                 </Link>
-                                            </Button>
+                                            </Button>{" "}
+                                            {/* --- Zmiany w przycisku Delete --- */}
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button
+                                                        variant="destructive"
+                                                        size="sm"
+                                                    >
+                                                        <Delete className="mr-2 h-4 w-4" />
+                                                        Delete
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>
+                                                            Are you sure?
+                                                        </AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            This action cannot
+                                                            be undone. This will
+                                                            permanently delete
+                                                            the conversation
+                                                            with{" "}
+                                                            <strong>
+                                                                {
+                                                                    conversation.callsign
+                                                                }
+                                                            </strong>
+                                                            .
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>
+                                                            Cancel
+                                                        </AlertDialogCancel>
+                                                        <AlertDialogAction
+                                                            onClick={() =>
+                                                                handleDelete(
+                                                                    conversation.callsign
+                                                                )
+                                                            }
+                                                        >
+                                                            Confirm
+                                                        </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
                                         </TableCell>
                                     </TableRow>
                                 ))}
