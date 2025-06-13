@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Clock, Loader2, Search, Settings } from "lucide-react";
+import { Clock, LayoutGrid, Loader2, Search, Settings } from "lucide-react";
 import Link from "next/link";
 import TncStatus from "@/components/tnc-status";
 import RecentStationsList from "@/components/recent-stations-list";
@@ -112,24 +112,37 @@ export default function Home() {
                         </div>
                     </div>
 
-                    <Link href="/settings">
-                        <Button
-                            variant="outline"
-                            size="icon"
-                            className="bg-white/90 dark:bg-gray-800/90 backdrop-blur dark:text-white dark:border-gray-600"
-                        >
-                            <Settings className="h-4 w-4" />
-                            <span className="sr-only">Settings</span>
-                        </Button>
-                    </Link>
+                    <div className="flex items-center gap-2">
+                        <Link href="/menu">
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                className="bg-white/90 dark:bg-gray-800/90 backdrop-blur dark:text-white dark:border-gray-600"
+                            >
+                                <LayoutGrid className="h-4 w-4" />
+                                <span className="sr-only">Menu</span>
+                            </Button>
+                        </Link>
+
+                        <Link href="/settings">
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                className="bg-white/90 dark:bg-gray-800/90 backdrop-blur dark:text-white dark:border-gray-600"
+                            >
+                                <Settings className="h-4 w-4" />
+                                <span className="sr-only">Settings</span>
+                            </Button>
+                        </Link>
+                    </div>
                 </div>
             </div>
 
-            <div className="absolute bottom-16 md:bottom-4 left-4 z-[1000]">
+            <div className="absolute bottom-16 md:bottom-4 left-4 z-[1001]">
                 <RecentStationsList />
             </div>
 
-            <div className="absolute bottom-16 md:bottom-4 right-4 z-[1000]">
+            <div className="absolute bottom-16 md:bottom-4 right-4 z-[1001]">
                 <TncStatus />
             </div>
 
