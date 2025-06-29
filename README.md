@@ -21,6 +21,32 @@ This project is specifically designed for amateur radio operators looking for a 
 -   **Dockerized Deployment:** Runs in a Docker container for an easy, one-command setup and complete portability.
 -   **Web-Based Interface:** Access your APRS feed from any device with a web browser on your local network.
 
+## Quick Start
+
+1.  **Install Docker.**
+    Make sure you have a working Docker environment. You can download [Docker Desktop](https://www.docker.com/products/docker-desktop/) for your operating system.
+
+2.  **Create a directory.**
+    Create a new folder for the project files, for example: `aprs-tnc-web`.
+
+    ```bash
+    mkdir aprs-tnc-web
+    cd aprs-tnc-web
+    ```
+
+3.  **Create the environment file.**
+    Copy the content of `.env.example` from the repository and save it as a new file named `.env` in your project directory.
+
+4.  **Create the Docker Compose file.**
+    Copy the `docker-compose.yaml` file from the repository into the same directory.
+
+5.  **Launch the application.**
+    Open a terminal in your project directory and run the following command:
+    ```bash
+    docker compose up -d
+    ```
+    The application will now be running and available at `http://<your-ip>:8000`, where `<your-ip>` is the IP address of the machine running Docker.
+
 ## Getting Started
 
 Getting APRS TNC Web up and running is designed to be as simple as possible.
