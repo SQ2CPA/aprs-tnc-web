@@ -51,7 +51,9 @@ export async function GET(request: NextRequest) {
                     callsign: station.callsign,
                     parsedType: "beacon",
                     receivedAt: { [Op.gte]: twentyFourHoursAgo },
-                    "parsedData.location.latitude": { [Op.ne]: null },
+                    "parsedData.location.latitude": {
+                        [Op.and]: [{ [Op.ne]: null }, { [Op.ne]: 0 }],
+                    },
                 },
                 order: [["receivedAt", "ASC"]],
                 attributes: ["parsedData"],
@@ -79,8 +81,16 @@ export async function GET(request: NextRequest) {
 
             return {
                 callsign: station.callsign,
-                lat: station.lastPositionLatitude,
-                lng: station.lastPositionLongitude,
+                lat:
+                    (
+                        pathPackets?.slice(0)?.pop()
+                            ?.parsedData as APRSBeaconFrame
+                    )?.location.latitude || station.lastPositionLatitude,
+                lng:
+                    (
+                        pathPackets?.slice(0)?.pop()
+                            ?.parsedData as APRSBeaconFrame
+                    )?.location.longitude || station.lastPositionLongitude,
                 comment: station.comment,
                 symbol: station.lastSymbol,
                 lastStatus: station.lastStatusAt,

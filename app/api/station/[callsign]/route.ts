@@ -18,7 +18,9 @@ export async function GET(
                 order: [["receivedAt", "DESC"]],
                 where: {
                     parsedType: "beacon",
-                    "parsedData.location.latitude": { [Op.ne]: null },
+                    "parsedData.location.latitude": {
+                        [Op.and]: [{ [Op.ne]: null }, { [Op.ne]: 0 }],
+                    },
                 },
                 limit: 1,
                 required: false,
@@ -40,7 +42,9 @@ export async function GET(
             callsign: stationWithLastPacket.callsign,
             parsedType: "beacon",
             receivedAt: { [Op.gte]: twentyFourHoursAgo },
-            "parsedData.location.latitude": { [Op.ne]: null },
+            "parsedData.location.latitude": {
+                [Op.and]: [{ [Op.ne]: null }, { [Op.ne]: 0 }],
+            },
         },
         order: [["receivedAt", "ASC"]],
         attributes: ["parsedData", "receivedAt", "path"],
