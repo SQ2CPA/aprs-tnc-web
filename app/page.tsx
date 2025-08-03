@@ -58,6 +58,20 @@ export default function Home() {
         return () => clearInterval(intervalId);
     }, [selectedHours]);
 
+    useEffect(() => {
+        const clean = async () => {
+            try {
+                await fetch(`/api/clean`, {
+                    method: "POST",
+                });
+            } catch (error) {
+                console.error("Failed to clean:", error);
+            }
+        };
+
+        clean();
+    }, []);
+
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         if (callsign.trim()) {
