@@ -10,7 +10,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { ArrowLeft, BarChartBig, Globe } from "lucide-react";
+import { ArrowLeft, BarChartBig, Globe, PackageOpen } from "lucide-react";
 
 export default function MenuPage() {
     return (
@@ -34,6 +34,21 @@ export default function MenuPage() {
                 </CardHeader>
                 <CardContent className="pt-2">
                     <div className="flex flex-col space-y-4">
+                        <Button
+                            variant="outline"
+                            size="lg"
+                            className="w-full justify-start p-6"
+                            asChild
+                        >
+                            <Link
+                                href="/packets"
+                                className="flex items-center text-base"
+                            >
+                                <PackageOpen className="mr-4 h-5 w-5 text-muted-foreground" />
+                                All Packets
+                            </Link>
+                        </Button>
+
                         <Button
                             variant="outline"
                             size="lg"
