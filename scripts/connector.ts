@@ -44,18 +44,23 @@ async function processAndSavePacket(
     const transaction = await sequelize.transaction();
 
     try {
+        const callsignWithSSID = currentMySSID
+            ? `${currentMyCallsign}-${currentMySSID}`
+            : (currentMyCallsign as string);
+
+        let stationCallsign = parsedAPRSPacket.sender;
+
         if (parsedAPRSPacket.type === "message") {
             const isBulletin = parsedAPRSPacket.recipient.startsWith("BLN");
 
             if (isBulletin) {
-                parsedAPRSPacket.ack = null;
-                parsedAPRSPacket.sender = parsedAPRSPacket.recipient;
+                stationCallsign = parsedAPRSPacket.recipient;
             }
         }
 
         const [station] = await Station.findOrCreate({
-            where: { callsign: parsedAPRSPacket.sender },
-            defaults: { callsign: parsedAPRSPacket.sender },
+            where: { callsign: stationCallsign },
+            defaults: { callsign: stationCallsign },
             transaction,
         });
 
@@ -104,10 +109,20 @@ async function processAndSavePacket(
                 }
             } else if (
                 parsedAPRSPacket.content.toLowerCase() !== "ping" &&
-                parsedAPRSPacket.sender !== currentMyCallsign &&
-                (parsedAPRSPacket.recipient === currentMyCallsign ||
+                parsedAPRSPacket.sender !== callsignWithSSID &&
+                (parsedAPRSPacket.recipient === callsignWithSSID ||
                     parsedAPRSPacket.recipient.startsWith("BLN"))
             ) {
+                const isBulletin = parsedAPRSPacket.recipient.startsWith("BLN");
+                const isCQ = parsedAPRSPacket.recipient === "BLN1CQ";
+
+                if (isCQ) {
+                    parsedAPRSPacket.recipient = callsignWithSSID;
+                } else if (isBulletin) {
+                    parsedAPRSPacket.ack = null;
+                    parsedAPRSPacket.sender = parsedAPRSPacket.recipient;
+                }
+
                 const messageId = parsedAPRSPacket.ack;
 
                 if (messageId) {
