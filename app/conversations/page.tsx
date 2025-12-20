@@ -114,7 +114,7 @@ export default function ConversationsPage() {
                     {/* ... bez zmian ... */}
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                            <CardTitle>Conversations</CardTitle>
+                            <CardTitle>Conversations & Bulletins</CardTitle>
                             <CardDescription>
                                 Your message conversations with other stations
                             </CardDescription>
@@ -126,7 +126,7 @@ export default function ConversationsPage() {
                             >
                                 <Button className="w-full sm:w-auto">
                                     <Plus className="mr-2 h-4 w-4" />
-                                    New Message
+                                    New
                                 </Button>
                             </Link>
                             <AlertDialog>

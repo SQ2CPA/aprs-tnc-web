@@ -51,7 +51,7 @@ export async function GET() {
             return acc;
         }, {} as Record<string, number>);
 
-        const conversations = latestMessages.map((message) => ({
+        const conversations = latestMessages.filter(message => message.sender !== 'BLN1CQ').map((message) => ({
             callsign: message.sender,
             lastMessage: message.content,
             createdAt: message.createdAt,

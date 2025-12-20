@@ -175,6 +175,8 @@ export default function MessagesPage() {
     };
 
     const getStatusBadge = (message: Message) => {
+        const isBulletin = message.sender.startsWith("BLN");
+
         switch (message.status) {
             case MessageStatus.RECEIVED_ACK:
                 return (
@@ -183,12 +185,28 @@ export default function MessagesPage() {
                     </Badge>
                 );
             case MessageStatus.SENDING:
+                if (isBulletin) {
+                    return (
+                        <Badge variant="success" className="text-xs">
+                            Sent
+                        </Badge>
+                    );
+                }
+
                 return (
                     <Badge variant="secondary" className="text-xs">
                         {`Sending (${message.retries || 0}/10)`}
                     </Badge>
                 );
             case MessageStatus.ABORTED:
+                if (isBulletin) {
+                    return (
+                        <Badge variant="success" className="text-xs">
+                            Sent
+                        </Badge>
+                    );
+                }
+
                 return (
                     <Badge variant="destructive" className="text-xs">
                         Aborted

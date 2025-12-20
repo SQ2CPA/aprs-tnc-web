@@ -44,6 +44,15 @@ async function processAndSavePacket(
     const transaction = await sequelize.transaction();
 
     try {
+        if (parsedAPRSPacket.type === "message") {
+            const isBulletin = parsedAPRSPacket.recipient.startsWith("BLN");
+
+            if (isBulletin) {
+                parsedAPRSPacket.ack = null;
+                parsedAPRSPacket.sender = parsedAPRSPacket.recipient;
+            }
+        }
+
         const [station] = await Station.findOrCreate({
             where: { callsign: parsedAPRSPacket.sender },
             defaults: { callsign: parsedAPRSPacket.sender },
@@ -96,7 +105,8 @@ async function processAndSavePacket(
             } else if (
                 parsedAPRSPacket.content.toLowerCase() !== "ping" &&
                 parsedAPRSPacket.sender !== currentMyCallsign &&
-                parsedAPRSPacket.recipient === currentMyCallsign
+                (parsedAPRSPacket.recipient === currentMyCallsign ||
+                    parsedAPRSPacket.recipient.startsWith("BLN"))
             ) {
                 const messageId = parsedAPRSPacket.ack;
 
@@ -284,6 +294,7 @@ async function processAndSavePacket(
                     ? `${currentMyCallsign}-${currentMySSID}`
                     : currentMyCallsign;
                 const path = aprsPath ? `,${aprsPath}` : "";
+
                 const ackPacket = `${callsignWithSSID}>${APRS_DESTINATION_CALLSIGN}${path}::${message.sender.padEnd(
                     9,
                     " "
@@ -313,9 +324,11 @@ async function processAndSavePacket(
             });
 
             for (const message of pendingMessages) {
+                const isBulletin = message.sender.startsWith("BLN");
+
                 if (
                     message.retries &&
-                    message.retries >= aprsMessageMaxRetries
+                    message.retries >= (isBulletin ? 1 : aprsMessageMaxRetries)
                 ) {
                     console.log(
                         `Message to ${message.sender} (ID: ${message.messageId}) reached max retries. Aborting.`
@@ -343,10 +356,13 @@ async function processAndSavePacket(
                         ? `${currentMyCallsign}-${currentMySSID}`
                         : currentMyCallsign;
                     const path = aprsPath ? `,${aprsPath}` : "";
+
                     const msgPacket = `${callsignWithSSID}>${APRS_DESTINATION_CALLSIGN}${path}::${message.sender.padEnd(
                         9,
                         " "
-                    )}:${message.content}{${message.messageId}`;
+                    )}:${message.content}${
+                        isBulletin ? "" : `{${message.messageId}`
+                    }`;
 
                     const success = await sendFrame(msgPacket);
                     if (success) {
