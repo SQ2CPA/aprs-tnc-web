@@ -27,7 +27,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { ArrowLeft, Delete, MessageSquare, Plus } from "lucide-react";
+import { ArrowLeft, Delete, MessageSquare, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -82,6 +82,22 @@ export default function ConversationsPage() {
         }
     };
 
+    const handleDeleteAll = async () => {
+        try {
+            const response = await fetch(`/api/conversations/delete-all`, {
+                method: "POST",
+            });
+
+            if (response.ok) {
+                fetchConversations();
+            } else {
+                console.error("Failed to delete all conversations");
+            }
+        } catch (error) {
+            console.error("Error deleting all conversations:", error);
+        }
+    };
+
     return (
         <FooterLayout>
             <div className="mb-6">
@@ -103,15 +119,51 @@ export default function ConversationsPage() {
                                 Your message conversations with other stations
                             </CardDescription>
                         </div>
-                        <Link
-                            href="/conversations/new"
-                            className="w-full sm:w-auto"
-                        >
-                            <Button className="w-full sm:w-auto">
-                                <Plus className="mr-2 h-4 w-4" />
-                                New Message
-                            </Button>
-                        </Link>
+                        <div className="flex flex-col gap-2 sm:flex-row w-full sm:w-auto">
+                            <Link
+                                href="/conversations/new"
+                                className="w-full sm:w-auto"
+                            >
+                                <Button className="w-full sm:w-auto">
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    New Message
+                                </Button>
+                            </Link>
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button
+                                        variant="destructive"
+                                        className="w-full sm:w-auto"
+                                        disabled={conversations.length === 0}
+                                    >
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        Delete All
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>
+                                            Delete all conversations?
+                                        </AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            This action cannot be undone. This
+                                            will permanently delete all
+                                            conversations and their messages.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>
+                                            Cancel
+                                        </AlertDialogCancel>
+                                        <AlertDialogAction
+                                            onClick={handleDeleteAll}
+                                        >
+                                            Delete All
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        </div>
                     </div>
                 </CardHeader>
                 <CardContent>

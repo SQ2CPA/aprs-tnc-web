@@ -44,3 +44,6 @@ frames.txt
 data/*
 !data/.gitkeep
 !.env.example
+
+.c*
+C*.md
