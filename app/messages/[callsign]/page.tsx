@@ -240,6 +240,8 @@ export default function MessagesPage() {
     const getActionButtons = (message: Message) => {
         if (message.type === "received") return null;
 
+        const isBulletin = message.sender.startsWith("BLN");
+
         switch (message.status) {
             case MessageStatus.SENDING:
                 return (
@@ -256,6 +258,20 @@ export default function MessagesPage() {
             case MessageStatus.ABORTED:
             case MessageStatus.DELIVERED:
             case MessageStatus.ERROR:
+                if (isBulletin) {
+                    return (
+                        <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => handleRetryMessage(message.id)}
+                            className="ml-2 px-2 py-1 h-auto"
+                        >
+                            <RotateCcw className="h-3 w-3" />
+                            <span className="ml-1 text-xs">Send again</span>
+                        </Button>
+                    );
+                }
+
                 return (
                     <Button
                         size="sm"
