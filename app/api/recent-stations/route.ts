@@ -7,11 +7,13 @@ export async function GET() {
         limit: 10,
     });
 
-    const recentStations = stations.map((station) => ({
-        callsign: station.callsign,
-        lastPacketAt: station.lastPacketAt,
-        lastSymbol: station.lastSymbol,
-    }));
+    const recentStations = stations
+        .filter((station) => !station.callsign.startsWith("BLN"))
+        .map((station) => ({
+            callsign: station.callsign,
+            lastPacketAt: station.lastPacketAt,
+            lastSymbol: station.lastSymbol,
+        }));
 
     return NextResponse.json(recentStations);
 }
