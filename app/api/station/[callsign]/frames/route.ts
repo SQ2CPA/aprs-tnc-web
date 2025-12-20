@@ -15,8 +15,10 @@ export async function GET(
             {
                 model: Packet,
                 as: "packets",
-                order: [["receivedAt", "DESC"]],
                 attributes: ["id", "rawFrame", "receivedAt"],
+                limit: 1000,
+                separate: true,
+                order: [["receivedAt", "DESC"]],
             },
         ],
     });
