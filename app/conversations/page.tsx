@@ -27,7 +27,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { ArrowLeft, Delete, MessageSquare, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, CheckCheck, Delete, MessageSquare, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -106,6 +106,22 @@ export default function ConversationsPage() {
         }
     };
 
+    const handleMarkAllRead = async () => {
+        try {
+            const response = await fetch(`/api/conversations/mark-all-read`, {
+                method: "POST",
+            });
+
+            if (response.ok) {
+                fetchConversations();
+            } else {
+                console.error("Failed to mark all as read");
+            }
+        } catch (error) {
+            console.error("Error marking all as read:", error);
+        }
+    };
+
     return (
         <FooterLayout>
             <div className="mb-6">
@@ -137,6 +153,20 @@ export default function ConversationsPage() {
                                     New
                                 </Button>
                             </Link>
+                            <Button
+                                variant="outline"
+                                className="w-full sm:w-auto"
+                                disabled={
+                                    conversations.reduce(
+                                        (sum, conv) => sum + conv.unread,
+                                        0
+                                    ) === 0
+                                }
+                                onClick={handleMarkAllRead}
+                            >
+                                <CheckCheck className="mr-2 h-4 w-4" />
+                                Mark all as read
+                            </Button>
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                     <Button
