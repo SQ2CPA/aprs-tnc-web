@@ -50,6 +50,14 @@ export default function MessagesPage() {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const { toast } = useToast();
 
+    const formatCallsign = (callsign: string) => {
+        if (callsign.startsWith("BLN")) {
+            const bulletinId = callsign.substring(3);
+            return `Bulletin ${bulletinId}`;
+        }
+        return callsign;
+    };
+
     const fetchMessages = async () => {
         try {
             const response = await fetch(`/api/messages/${callsign}`);
@@ -277,15 +285,21 @@ export default function MessagesPage() {
 
             <Card className="flex flex-col h-[calc(70vh)]">
                 <CardHeader>
-                    <CardTitle>Messages with {callsign}</CardTitle>
-                    <CardDescription>
-                        <Link
-                            href={`/station/${callsign}`}
-                            className="text-blue-500 hover:underline"
-                        >
-                            View station details
-                        </Link>
-                    </CardDescription>
+                    <CardTitle>
+                        {callsign.startsWith("BLN")
+                            ? `${formatCallsign(callsign)}`
+                            : `Messages with ${callsign}`}
+                    </CardTitle>
+                    {!callsign.startsWith("BLN") && (
+                        <CardDescription>
+                            <Link
+                                href={`/station/${callsign}`}
+                                className="text-blue-500 hover:underline"
+                            >
+                                View station details
+                            </Link>
+                        </CardDescription>
+                    )}
                 </CardHeader>
                 <CardContent className="flex-grow overflow-y-auto">
                     {loading ? (

@@ -44,6 +44,14 @@ export default function ConversationsPage() {
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [loading, setLoading] = useState(true);
 
+    const formatCallsign = (callsign: string) => {
+        if (callsign.startsWith("BLN")) {
+            const bulletinId = callsign.substring(3);
+            return `Bulletin ${bulletinId}`;
+        }
+        return callsign;
+    };
+
     const fetchConversations = async () => {
         try {
             const response = await fetch("/api/conversations");
@@ -183,7 +191,7 @@ export default function ConversationsPage() {
                                 {conversations.map((conversation) => (
                                     <TableRow key={conversation.callsign}>
                                         <TableCell className="font-medium">
-                                            {conversation.callsign}
+                                            {formatCallsign(conversation.callsign)}
                                         </TableCell>
                                         <TableCell className="truncate max-w-[150px]">
                                             <div className="flex items-center gap-2">
