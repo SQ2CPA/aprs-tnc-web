@@ -14,8 +14,18 @@ import {
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Trash2 } from "lucide-react";
 import Link from "next/link";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface SettingsData {
     tncAddress: string;
@@ -42,6 +52,8 @@ export default function SettingsPage() {
         useState<SettingsData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
+    const [isCleaning, setIsCleaning] = useState(false);
+    const [showCleanDialog, setShowCleanDialog] = useState(false);
     const { toast } = useToast();
 
     useEffect(() => {
@@ -140,6 +152,34 @@ export default function SettingsPage() {
         }
     };
 
+    const handleCleanDatabase = async () => {
+        setIsCleaning(true);
+        try {
+            const response = await fetch("/api/database/clean", {
+                method: "POST",
+            });
+
+            if (response.ok) {
+                toast({
+                    title: "Database cleaned",
+                    description: "All messages and stations have been removed.",
+                });
+                setShowCleanDialog(false);
+            } else {
+                throw new Error("Failed to clean database");
+            }
+        } catch (error) {
+            console.error("Error cleaning database:", error);
+            toast({
+                title: "Error",
+                description: "Failed to clean database. Please try again.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsCleaning(false);
+        }
+    };
+
     const hasChanged = originalSettings
         ? tncAddress !== originalSettings.tncAddress ||
           messagePath !== originalSettings.messagePath ||
@@ -153,8 +193,20 @@ export default function SettingsPage() {
 
     if (isLoading) {
         return (
-            <div className="container max-w-2xl py-10 flex justify-center items-center text-white">
-                <p>Loading settings...</p>
+            <div className="container max-w-2xl py-10">
+                <div className="mb-6">
+                    <Button variant="secondary" asChild>
+                        <Link href="/" className="flex items-center">
+                            <ArrowLeft className="mr-2 h-4 w-4" />
+                            Back to Map
+                        </Link>
+                    </Button>
+                </div>
+                <Card>
+                    <CardContent className="py-10 flex justify-center items-center">
+                        <p>Loading settings...</p>
+                    </CardContent>
+                </Card>
             </div>
         );
     }
@@ -312,6 +364,57 @@ export default function SettingsPage() {
                     </CardFooter>
                 </form>
             </Card>
+
+            <Card className="mt-12 border-destructive">
+                <CardHeader>
+                    <CardTitle className="text-destructive">Danger Zone</CardTitle>
+                    <CardDescription>
+                        Irreversible actions that affect your data.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h3 className="font-semibold">Clean Database</h3>
+                            <p className="text-sm text-muted-foreground">
+                                Remove all messages, stations, and packets from the database.
+                                Settings will be preserved.
+                            </p>
+                        </div>
+                        <Button
+                            variant="destructive"
+                            onClick={() => setShowCleanDialog(true)}
+                            disabled={isCleaning}
+                        >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Clean Database
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
+
+            <AlertDialog open={showCleanDialog} onOpenChange={setShowCleanDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete all
+                            messages, stations, and packets from your database. Your settings
+                            will be preserved.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isCleaning}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleCleanDatabase}
+                            disabled={isCleaning}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                            {isCleaning ? "Cleaning..." : "Yes, clean database"}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }
