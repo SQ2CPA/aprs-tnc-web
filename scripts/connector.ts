@@ -124,39 +124,22 @@ async function processAndSavePacket(
                 }
 
                 const messageId = parsedAPRSPacket.ack;
+                const thirtySecondsAgo = new Date(Date.now() - 30 * 1000);
 
-                if (messageId) {
-                    const fifteenSecondsAgo = new Date(Date.now() - 15 * 1000);
-
-                    const existingMessage = await Message.findOne({
-                        where: {
-                            messageId: messageId,
-                            sender: parsedAPRSPacket.sender,
-                            receivedAt: {
-                                [Op.gte]: fifteenSecondsAgo,
-                            },
+                const existingMessage = await Message.findOne({
+                    where: {
+                        sender: parsedAPRSPacket.sender,
+                        content: parsedAPRSPacket.content,
+                        receivedAt: {
+                            [Op.gte]: thirtySecondsAgo,
                         },
-                    });
+                    },
+                });
 
-                    if (existingMessage) {
-                        console.log(
-                            `Skipping duplicate message with ID ${messageId} from ${parsedAPRSPacket.sender}.`
-                        );
-                    } else {
-                        await Message.create(
-                            {
-                                sender: parsedAPRSPacket.sender,
-                                type: "received",
-                                content: parsedAPRSPacket.content,
-                                receivedAt: new Date(),
-                                status: MessageStatus.RECEIVED,
-                                isUnread: true,
-                                messageId: messageId,
-                                isFromIS: parsedAPRSPacket.isFromIS || false,
-                            },
-                            { transaction }
-                        );
-                    }
+                if (existingMessage) {
+                    console.log(
+                        `Skipping duplicate message from ${parsedAPRSPacket.sender} with same content within 30 seconds.`
+                    );
                 } else {
                     await Message.create(
                         {
@@ -166,7 +149,7 @@ async function processAndSavePacket(
                             receivedAt: new Date(),
                             status: MessageStatus.RECEIVED,
                             isUnread: true,
-                            messageId: undefined,
+                            messageId: messageId || undefined,
                             isFromIS: parsedAPRSPacket.isFromIS || false,
                         },
                         { transaction }
