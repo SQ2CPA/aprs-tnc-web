@@ -10,7 +10,13 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { ArrowLeft, BarChartBig, Globe, PackageOpen } from "lucide-react";
+import {
+    ArrowLeft,
+    BarChartBig,
+    Globe,
+    PackageOpen,
+    Terminal,
+} from "lucide-react";
 
 export default function MenuPage() {
     return (
@@ -76,6 +82,21 @@ export default function MenuPage() {
                             >
                                 <Globe className="mr-4 h-5 w-5 text-muted-foreground" />
                                 DX Statistics
+                            </Link>
+                        </Button>
+
+                        <Button
+                            variant="destructive"
+                            size="lg"
+                            className="w-full justify-start p-6"
+                            asChild
+                        >
+                            <Link
+                                href="/packet-console"
+                                className="flex items-center text-base"
+                            >
+                                <Terminal className="mr-4 h-5 w-5" />
+                                Packet Console
                             </Link>
                         </Button>
                     </div>

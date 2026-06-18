@@ -1,18 +1,44 @@
-import { Packet } from "@/lib/db/models";
+import { ensureDatabaseSchema } from "@/lib/db/ensure-schema";
+import { Packet, PacketConsoleEvent } from "@/lib/db/models";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-    const lastPacket = await Packet.findOne({
-        order: [["receivedAt", "DESC"]],
-        limit: 1,
-    });
+    try {
+        await ensureDatabaseSchema();
 
-    const status = {
-        connected: true,
-        working: true,
-        lastTx: null,
-        lastRx: lastPacket?.receivedAt,
-    };
+        const [lastPacket, lastTxEvent] = await Promise.all([
+            Packet.findOne({
+                order: [["receivedAt", "DESC"]],
+                limit: 1,
+            }),
+            PacketConsoleEvent.findOne({
+                where: {
+                    direction: "TX",
+                },
+                order: [["createdAt", "DESC"]],
+                limit: 1,
+            }),
+        ]);
 
-    return NextResponse.json(status);
+        const status = {
+            connected: true,
+            working: true,
+            lastTx: lastTxEvent?.createdAt || null,
+            lastRx: lastPacket?.receivedAt || null,
+        };
+
+        return NextResponse.json(status);
+    } catch (error) {
+        console.error("Error fetching TNC status:", error);
+
+        return NextResponse.json(
+            {
+                connected: false,
+                working: false,
+                lastTx: null,
+                lastRx: null,
+            },
+            { status: 500 }
+        );
+    }
 }

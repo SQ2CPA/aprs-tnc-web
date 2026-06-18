@@ -1,16 +1,23 @@
 import parseAPRSFrame from "@/lib/aprs";
 import {
-    APRSBeaconFrame,
     APRSFrame,
-    APRSMessageFrame,
     APRSPacketType,
+    APRSBeaconFrame,
     APRSStatusFrame,
 } from "@/lib/aprs/types";
-import { Setting, Packet, sequelize, Message } from "@/lib/db/models";
+import {
+    Message,
+    Packet,
+    PacketConsoleEvent,
+    PacketConsoleTransmission,
+    Setting,
+    sequelize,
+} from "@/lib/db/models";
 import { MessageStatus } from "@/lib/db/models/Message";
 import { PacketCreationAttributes } from "@/lib/db/models/Packet";
 import Station, { StationAttributes } from "@/lib/db/models/Station";
 import { decodeKISS, encodeKISS, KissChar } from "@/lib/kiss";
+import { PACKET_CONSOLE_POLL_INTERVAL_MS } from "@/lib/packet-console";
 import { appendFile } from "fs/promises";
 import * as net from "net";
 import { Op } from "sequelize";
@@ -28,6 +35,16 @@ let client: net.Socket;
 let inactivityTimer: NodeJS.Timeout | null = null;
 let reconnectTimeout: NodeJS.Timeout | null = null;
 let isProcessingMessages = false;
+let isProcessingPacketConsoleTransmissions = false;
+
+type SendFrameResult =
+    | {
+          success: true;
+      }
+    | {
+          success: false;
+          errorMessage: string;
+      };
 
 async function processAndSavePacket(
     parsedAPRSPacket: APRSFrame,
@@ -187,11 +204,18 @@ async function processAndSavePacket(
         } else if (parsedAPRSPacket.type === "status") {
             const status = parsedAPRSPacket as APRSStatusFrame;
             packetData.statusText = status.content;
-        } else if (parsedAPRSPacket.type === "message") {
-            const message = parsedAPRSPacket as APRSMessageFrame;
         }
 
-        await Packet.create(packetData, { transaction });
+        const savedPacket = await Packet.create(packetData, { transaction });
+
+        await PacketConsoleEvent.create(
+            {
+                direction: "RX",
+                rawFrame: rawDecodedFrame,
+                packetId: savedPacket.id,
+            },
+            { transaction }
+        );
 
         await transaction.commit();
         console.log(`✅ Saved and updated frame from ${station.callsign}.`);
@@ -232,32 +256,42 @@ async function processAndSavePacket(
         }
     }
 
-    function sendFrame(ax25FrameAsString: string): Promise<boolean> {
+    function sendFrame(ax25FrameAsString: string): Promise<SendFrameResult> {
         return new Promise((resolve) => {
             if (!client || client.destroyed || !client.writable) {
-                console.warn(
-                    "Client not connected or not writable. Cannot send frame."
-                );
-                return resolve(false);
+                const errorMessage =
+                    "Client not connected or not writable. Cannot send frame.";
+                console.warn(errorMessage);
+                return resolve({
+                    success: false,
+                    errorMessage,
+                });
             }
             console.log(`Sending frame: ${ax25FrameAsString}`);
             const kissFrame = encodeKISS(ax25FrameAsString);
             if (kissFrame) {
                 client.write(kissFrame, (err) => {
                     if (err) {
-                        console.error(
-                            "Error while sending frame:",
-                            err.message
-                        );
-                        resolve(false);
+                        const errorMessage = `Error while sending frame: ${err.message}`;
+                        console.error(errorMessage);
+                        resolve({
+                            success: false,
+                            errorMessage,
+                        });
                     } else {
                         console.log("Frame sent.");
-                        resolve(true);
+                        resolve({
+                            success: true,
+                        });
                     }
                 });
             } else {
-                console.error("Failed to encode KISS frame.");
-                resolve(false);
+                const errorMessage = "Failed to encode KISS frame.";
+                console.error(errorMessage);
+                resolve({
+                    success: false,
+                    errorMessage,
+                });
             }
         });
     }
@@ -298,8 +332,8 @@ async function processAndSavePacket(
                     " "
                 )}:ack${message.messageId}`;
 
-                const success = await sendFrame(ackPacket);
-                if (success) {
+                const result = await sendFrame(ackPacket);
+                if (result.success) {
                     await message.update({
                         status: MessageStatus.RECEIVED_ACK,
                     });
@@ -308,7 +342,7 @@ async function processAndSavePacket(
                     );
                 } else {
                     console.warn(
-                        `Failed to send ACK for message ${message.messageId}. Will retry.`
+                        `Failed to send ACK for message ${message.messageId}. ${result.errorMessage}`
                     );
                 }
                 await new Promise((resolve) => setTimeout(resolve, 250));
@@ -362,15 +396,15 @@ async function processAndSavePacket(
                         isBulletin ? "" : `{${message.messageId}`
                     }`;
 
-                    const success = await sendFrame(msgPacket);
-                    if (success) {
+                    const result = await sendFrame(msgPacket);
+                    if (result.success) {
                         await message.update({
                             retries: (message.retries || 0) + 1,
                             lastSendAt: new Date(),
                         });
                     } else {
                         console.warn(
-                            `Failed to send message ${message.messageId} to ${message.sender}. Will retry if possible.`
+                            `Failed to send message ${message.messageId} to ${message.sender}. ${result.errorMessage}`
                         );
                     }
                     await new Promise((resolve) => setTimeout(resolve, 500));
@@ -380,6 +414,70 @@ async function processAndSavePacket(
             console.error("Error during processMessages:", error);
         } finally {
             isProcessingMessages = false;
+        }
+    }
+
+    async function processPacketConsoleTransmissions() {
+        if (isProcessingPacketConsoleTransmissions) {
+            return;
+        }
+
+        isProcessingPacketConsoleTransmissions = true;
+
+        try {
+            const pendingTransmissions = await PacketConsoleTransmission.findAll({
+                where: {
+                    status: "pending",
+                },
+                order: [["createdAt", "ASC"]],
+                limit: 10,
+            });
+
+            for (const transmission of pendingTransmissions) {
+                const result = await sendFrame(transmission.rawFrame);
+
+                if (result.success) {
+                    const transaction = await sequelize.transaction();
+
+                    try {
+                        await transmission.update(
+                            {
+                                status: "sent",
+                                errorMessage: null,
+                                processedAt: new Date(),
+                            },
+                            { transaction }
+                        );
+
+                        await PacketConsoleEvent.create(
+                            {
+                                direction: "TX",
+                                rawFrame: transmission.rawFrame,
+                                transmissionId: transmission.id,
+                            },
+                            { transaction }
+                        );
+
+                        await transaction.commit();
+                    } catch (error) {
+                        await transaction.rollback();
+                        throw error;
+                    }
+                } else {
+                    await transmission.update({
+                        status: "failed",
+                        errorMessage: result.errorMessage,
+                        processedAt: new Date(),
+                    });
+                }
+            }
+        } catch (error) {
+            console.error(
+                "Error during packet console transmission processing:",
+                error
+            );
+        } finally {
+            isProcessingPacketConsoleTransmissions = false;
         }
     }
 
@@ -543,4 +641,8 @@ async function processAndSavePacket(
     setInterval(checkAndApplySettings, CONFIG_CHECK_INTERVAL_MS);
 
     setInterval(processMessages, MESSAGE_PROCESSING_INTERVAL_MS);
+    setInterval(
+        processPacketConsoleTransmissions,
+        PACKET_CONSOLE_POLL_INTERVAL_MS
+    );
 })();
