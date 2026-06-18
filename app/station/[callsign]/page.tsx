@@ -51,7 +51,7 @@ const weatherLabels: Record<
     },
     windGust: {
         label: "Wind Gust",
-        unit: "km/h",
+        unit: "m/s",
         icon: <Wind className="h-4 w-4 text-muted-foreground" />,
     },
     pressure: {
