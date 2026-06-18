@@ -8,7 +8,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Download } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -44,8 +44,21 @@ export default function RawFramesPage() {
         }
     }, [callsign]);
 
+    const handleDownload = () => {
+        const content = frames.map((frame) => frame.raw).join("\n");
+        const blob = new Blob([content], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `aprs-frames-${callsign}-${new Date().toISOString()}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+
     return (
-        <FooterLayout>
+        <FooterLayout maxWidthClassName="max-w-7xl">
             <div className="mb-6">
                 <Button variant="secondary" asChild>
                     <Link
@@ -60,10 +73,23 @@ export default function RawFramesPage() {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Raw Frames</CardTitle>
-                    <CardDescription>
-                        All raw APRS frames for {callsign}
-                    </CardDescription>
+                    <div className="flex items-start justify-between">
+                        <div>
+                            <CardTitle>Raw Frames</CardTitle>
+                            <CardDescription>
+                                All raw APRS frames for {callsign}
+                            </CardDescription>
+                        </div>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleDownload}
+                            disabled={loading || frames.length === 0}
+                        >
+                            <Download className="mr-2 h-4 w-4" />
+                            Download txt
+                        </Button>
+                    </div>
                 </CardHeader>
                 <CardContent>
                     {loading ? (
